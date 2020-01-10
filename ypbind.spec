@@ -1,7 +1,7 @@
 Summary: The NIS daemon which binds NIS clients to an NIS domain
 Name: ypbind
 Version: 1.20.4
-Release: 29%{?dist}
+Release: 30%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 Source0: ftp://ftp.us.kernel.org/pub/linux/utils/net/NIS/ypbind-mt-%{version}.tar.bz2
@@ -114,6 +114,12 @@ fi
 %doc README NEWS COPYING
 
 %changelog
+* Wed Oct 10 2012 Honza Horak <hhorak@redhat.com> - 3:1.20.4-30
+- Modified the chkconfig priorities from 27/73 to 24/76, to move ypbind
+  before netfs. This is useful for hosts that mount NFS file systems
+  that reside on a server which is resolvable through NIS.
+  Resolves: #647495
+
 * Tue Jun 22 2010 Karel Klic <kklic@redhat.com> - 3:1.20.4-29
 - Remove matches when dereferencing DBus connection.
   Resolves: #597407
