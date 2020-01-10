@@ -1,0 +1,58 @@
+.\"     Title: yp.conf
+.\"    Author: 
+.\" Generator: DocBook XSL Stylesheets vsnapshot_2006\-08\-24_0226 <http://docbook.sf.net/>
+.\"      Date: 10/04/2006
+.\"    Manual: ypbind\-mt
+.\"    Source: ypbind\-mt
+.\"
+.TH "YP.CONF" "5" "10/04/2006" "ypbind\-mt" "ypbind\-mt"
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.SH "NAME"
+yp.conf \- NIS binding configuration file
+.SH "DESCRIPTION"
+.PP
+The file
+\fI/etc/yp.conf\fR
+is read from
+\fBypbind\fR(8)
+at startup or when receiving signal SIGHUP. The entries are used for the initial binding. Valid entries are
+.TP 3n
+\fBdomain\fR \fInisdomain\fR \fBserver\fR \fIhostname\fR
+Use server
+\fIhostname\fR
+for the domain
+\fInisdomain\fR. You could have more then one entry of this type for a single domain.
+.TP 3n
+\fBdomain\fR \fInisdomain\fR \fBbroadcast\fR
+Use broadcast on the local net for domain
+\fInisdomain\fR.
+.TP 3n
+\fBdomain\fR \fInisdomain\fR \fBslp\fR
+Query the local running SLP server for hosts running ypserv and distributing
+\fInisdomain\fR. This option is only available, if
+\fBypbind\fR
+was compiled with SLP support.
+.TP 3n
+\fBypserver\fR \fIhostname\fR
+Use server
+\fIhostname\fR
+for the local domain.
+.TP 3n
+\fBbroadcast\fR
+If no other server is given or all of them are not reachable, try a broadcast call for the default domain to find a server.
+.PP
+If for a specific domain the broadcast option and fixed server are given,
+\fBypbind\-mt\fR
+tries at first the given servers before falling back to broadcasting for a running server.
+.SH "SEE ALSO"
+.PP
+
+\fBypbind\fR(8)
+.SH "AUTHOR"
+.PP
+
+\fBypbind\-mt\fR
+was written by Thorsten Kukuk <kukuk@thkukuk.de>.

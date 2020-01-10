@@ -1,0 +1,185 @@
+.\"     Title: ypbind
+.\"    Author: 
+.\" Generator: DocBook XSL Stylesheets vsnapshot_2006\-08\-24_0226 <http://docbook.sf.net/>
+.\"      Date: 10/04/2006
+.\"    Manual: ypbind\-mt
+.\"    Source: ypbind\-mt
+.\"
+.TH "YPBIND" "8" "10/04/2006" "ypbind\-mt" "ypbind\-mt"
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.SH "NAME"
+ypbind \- NIS binding process
+.SH "SYNOPSIS"
+.HP 7
+\fBypbind\fR [\-c] [\-d | \-debug] [\-broadcast] [\-broken\-server] [\-ypset] [\-ypsetme] [\-no\-ping] [\-f\ \fIconfigfile\fR] [\-local\-only] [\-ping\-interval\ \fIping\-interval\fR] [\-no\-dbus]
+.HP 7
+\fBypbind\fR \-\-version
+.SH "DESCRIPTION"
+.PP
+
+\fBypbind\fR
+finds the server for NIS domains and maintains the NIS binding information. The client (normaly the NIS routines in the standard C library) could get the information over RPC from
+\fBypbind\fR
+or read the binding files. The binding files resides in the directory
+\fI/var/yp/binding\fR
+and are conventionally named
+\fB[domainname].[version]\fR. The supported versions are 1 and 2. There could be several such files since it is possible for an NIS client to be bound to more than one domain.
+.PP
+After a binding has been established,
+\fBypbind\fR
+will send YPPROC_DOMAIN requests to the current NIS server at 20 seconds intervals. If it doesn't get an response or the NIS server reports that he doesn't have this domain any longer,
+\fBypbind\fR
+will search for a new NIS server. All 15 minutes
+\fBypbind\fR
+will check to see if the current NIS server is the fastest. If it find a server which answers faster, it will switch to this server. You could tell
+\fBypbind\fR
+to use network broadcasts to find a new server, what is insecure, or you could give it a list of known secure servers. In this case
+\fBypbind\fR
+will send a ping to all servers and binds to first one which answers.
+.PP
+Unless the option
+\fB\-debug\fR
+is used, ypbind detaches itself from the controlling terminal and puts itself into background.
+\fBypbind\fR
+uses
+\fBsyslog\fR(3)
+for logging errors and warnings. At startup or when receiving signal SIGHUP,
+\fBypbind\fR
+parses the file
+\fI/etc/yp.conf\fR
+and tries to use the entries for its initial binding.
+.PP
+A broadcast entry in the configuration file will overwrite a ypserver/server entry and a ypserver/server entry broadcast. If all given server are down,
+\fBypbind\fR
+will
+\fBnot\fR
+switch to use broadcast.
+\fBypbind\fR
+will try at first
+\fI/etc/hosts\fR
+and then
+\fBDNS\fR
+for resolving the hosts names from
+\fI/etc/yp.conf\fR. If
+\fBypbind\fR
+couldn't reconfigure the search order, it will use only
+\fBDNS\fR. If
+\fBDNS\fR
+isn't available, you could only use IP\-addresses in
+\fI/etc/hosts\fR.
+\fBypbind\fR
+could only reconfigure the search order with glibc 2.x. If the
+\fB\-broadcast\fR
+option is specified,
+\fBypbind\fR
+will ignore the configuration file. If the file does not exist or if there are no valid entries,
+\fBypbind\fR
+exit.
+.PP
+This
+\fBypbind\fR
+version listens for DBUS messages from NetworkManager. If no NetworkManager is running at startup,
+\fBypbind\fR
+will behave as usual and assumes there is a working network connection. If NetworkManager is running on the system, ypbind will only search and providde NIS informations, if NetworkManager tells that a network connection is available. If NetworkManager establishes a connection,
+\fBypbind\fR
+will reread all configuration files, registers at the local portmapper and try to search NIS servers. If NetworkManager drops a connection,
+\fBypbind\fR
+will unregister from portmapper.
+.SH "OPTIONS"
+.TP 3n
+\fB\-broadcast\fR
+Send a broadcast to request the information needed to bind to a specific NIS server. With this option,
+\fI/etc/yp.conf\fR
+will be ignored.
+.TP 3n
+\fB\-ypset\fR
+Allow
+\fBroot\fR
+from any remote machine to change the binding for a domain via the
+\fBypset\fR(8)
+command. By default, no one can change the binding. This option is really insecure. If you change a binding for a domain, all the current known servers for this domain will be forgotten. If the new server goes down,
+\fBypbind\fR
+will use the old searchlist.
+.TP 3n
+\fB\-ypsetme\fR
+The same as
+\fB\-ypset\fR, but only
+\fBroot\fR
+on the local machine is allowed to chang the binding. Such requests are only allowd from
+\fBloopback\fR.
+.TP 3n
+\fB\-c\fR
+\fBypbind\fR
+only checks if the config file has syntax errors and exits.
+.TP 3n
+\fB\-debug\fR
+starts
+\fBypbind\fR
+in debug mode.
+\fBypbind\fR
+will not put itself into background, and error messages and debug output are written to standard error.
+.TP 3n
+\fB\-broken\-server\fR
+lets
+\fBypbind\fR
+accept answers from servers running on an illegal port number. This should usually be avoided, but is required by some
+\fBypserv\fR(8)
+versions.
+.TP 3n
+\fB\-no\-ping\fR
+\fBypbind\fR
+will not check if the binding is alive. This option is for use with dialup connections to prevent
+\fBypbind\fR
+from keeping the connection unnessecarily open or causing autodials.
+.TP 3n
+\fB\-f\fR configfile
+\fBypbind\fR
+will use
+\fBconfigfile\fR
+and not
+\fI/etc/yp.conf\fR
+.TP 3n
+\fB\-local\-only\fR
+\fBypbind\fR
+will only bind to the loopback device and is not reacheable from a remote network.
+.TP 3n
+\fB\-ping\-interval\fR ping\-interval
+The default value for
+\fBypbind\fR
+to check, if a NIS server is still reacheable, is 20 seconds. With this options another frequency in seconds can be specified.
+.TP 3n
+\fB\-no\-dbus\fR
+Disables DBUS support if compiled in.
+.TP 3n
+\fB\-\-version\fR
+Prints the version number
+.SH "FILES"
+.TP 3n
+\fI/etc/yp.conf\fR
+configuration file.
+.TP 3n
+\fI/var/yp/binding/[domainname].[version]\fR
+binding file containing information about each NIS domain.
+.TP 3n
+\fI/var/run/ypbind.pid\fR
+contains the process id of the currently running
+\fBypbind\fR
+master process.
+.SH "SEE ALSO"
+.PP
+
+\fBsyslog\fR(3),
+\fBdomainname\fR(1),
+\fByp.conf\fR(5),
+\fBypdomainname\fR(8),
+\fBypwhich\fR(1),
+\fBypserv\fR(8),
+\fBypset\fR(8)
+.SH "AUTHOR"
+.PP
+
+\fBypbind\-mt\fR
+was written by Thorsten Kukuk <kukuk@thkukuk.de>.
