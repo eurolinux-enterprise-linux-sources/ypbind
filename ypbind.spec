@@ -1,7 +1,7 @@
 Summary: The NIS daemon which binds NIS clients to an NIS domain
 Name: ypbind
 Version: 1.20.4
-Release: 30%{?dist}
+Release: 31%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 Source0: ftp://ftp.us.kernel.org/pub/linux/utils/net/NIS/ypbind-mt-%{version}.tar.bz2
@@ -27,6 +27,10 @@ Patch10: ypbind-mt-1.20.4-strict-aliasing.patch
 Patch11: ypbind-mt-1.20.4-add-server.patch
 # Sent to upstream.
 Patch12: ypbind-mt-1.20.4-matches.patch
+Patch13: ypbind-mt-1.20.4-nmlocal.patch
+Patch14: ypbind-mt-1.20.4-sigpipe.patch
+Patch15: ypbind-mt-1.20.4-manhelp.patch
+Patch16: ypbind-mt-1.20.4-rebind.patch
 
 Requires(post): chkconfig
 Requires(preun): chkconfig
@@ -70,6 +74,10 @@ also need to install the ypserv package to a machine on your network.
 %patch10 -p1 -b .strict-aliasing
 %patch11 -p1 -b .add-server
 %patch12 -p1 -b .matches
+%patch13 -p1 -b .nmlocal
+%patch14 -p1 -b .sigpipe
+%patch15 -p1 -b .manhelp
+%patch16 -p1 -b .rebind
 
 %build
 %configure
@@ -114,6 +122,24 @@ fi
 %doc README NEWS COPYING
 
 %changelog
+* Thu Feb 19 2015 Honza Horak <hhorak@redhat.com> - 3:1.20.4-31
+- ypbind init script should check for ypbind in /etc/rpc
+  Resolves: #888778
+- ypbind does not bind to ypserv on localhost (same machine) if NetworkManager
+  thinks that the network is off.
+  Resolves: #829487
+- ypbind does not take NISTIMEOUT into account during service start if
+  rpcinfo doesn't work
+  Resolves: #846080
+- add SIGPIPE into signal set
+  Resolves: #842228
+- Fix differencies between man page and program --help
+  Resolves: #627492
+- Fix nis.sh run by dhclient to not create files with wrong context
+  Resolves: #681134
+- Add rebind option to ypbind
+  Resolves: #918276
+
 * Wed Oct 10 2012 Honza Horak <hhorak@redhat.com> - 3:1.20.4-30
 - Modified the chkconfig priorities from 27/73 to 24/76, to move ypbind
   before netfs. This is useful for hosts that mount NFS file systems

@@ -1,0 +1,121 @@
+Add possibility to change period within the ypbind finds the fastest server.
+
+diff -up ypbind-mt-1.20.4/man/ypbind.8.rebind ypbind-mt-1.20.4/man/ypbind.8
+--- ypbind-mt-1.20.4/man/ypbind.8.rebind	2015-02-19 16:19:26.296050606 +0100
++++ ypbind-mt-1.20.4/man/ypbind.8	2015-02-19 16:19:26.297050605 +0100
+@@ -14,7 +14,7 @@
+ ypbind \- NIS binding process
+ .SH "SYNOPSIS"
+ .HP 7
+-\fBypbind\fR [\-c] [\-d | \-debug] [\-verbose] [\-broadcast] [\-broken\-server] [\-ypset] [\-ypsetme] [\-no\-ping] [\-p \fIport\fR] [\-f\ \fIconfigfile\fR] [\-local\-only] [\-ping\-interval\ \fIping\-interval\fR] [\-no\-dbus]
++\fBypbind\fR [\-c] [\-d | \-debug] [\-verbose] [\-broadcast] [\-broken\-server] [\-ypset] [\-ypsetme] [\-no\-ping] [\-p \fIport\fR] [\-f\ \fIconfigfile\fR] [\-local\-only] [\-ping\-interval\ \fIping\-interval\fR] [\-rebind\-interval\ \fIrebind\-interval\fR] [\-no\-dbus]
+ .HP 7
+ \fBypbind\fR \-\-version
+ .SH "DESCRIPTION"
+@@ -163,6 +163,11 @@ The default value for
+ \fBypbind\fR
+ to check, if a NIS server is still reacheable, is 20 seconds. With this options another frequency in seconds can be specified.
+ .TP 3n
++\fB\-rebind\-interval\fR rebind\-interval
++The default value for
++\fBypbind\fR
++to search for the fastest NIS server is 900 seconds (15 minutes). With this options another frequency in seconds can be specified.
++.TP 3n
+ \fB\-no\-dbus\fR
+ Disables DBUS support if compiled in.
+ .TP 3n
+diff -up ypbind-mt-1.20.4/man/ypbind.8.xml.rebind ypbind-mt-1.20.4/man/ypbind.8.xml
+--- ypbind-mt-1.20.4/man/ypbind.8.xml.rebind	2006-10-04 17:26:24.000000000 +0200
++++ ypbind-mt-1.20.4/man/ypbind.8.xml	2015-02-19 16:19:26.297050605 +0100
+@@ -49,6 +49,7 @@
+       <arg choice='opt'>-f <replaceable>configfile</replaceable></arg>
+       <arg choice='opt'>-local-only </arg>
+       <arg choice='opt'>-ping-interval <replaceable>ping-interval</replaceable></arg>
++      <arg choice='opt'>-rebind-interval <replaceable>rebind-interval</replaceable></arg>
+       <arg choice='opt'>-no-dbus </arg>
+   </cmdsynopsis>
+   <cmdsynopsis>
+@@ -255,6 +256,15 @@ to check, if a NIS server is still reach
+ With this options another frequency in seconds can be specified.</para>
+   </listitem>
+   </varlistentry>
++  <varlistentry>
++  <term><option>-rebind-interval</option></term>
++  <listitem>
++<para>The default value for
++<command>ypbind</command>
++to search for the fastest NIS server is 900 seconds (15 minutes).
++With this options another frequency in seconds can be specified.</para>
++  </listitem>
++  </varlistentry>
+   <varlistentry>
+   <term><option>-no-dbus</option></term>
+   <listitem>
+diff -up ypbind-mt-1.20.4/src/local.h.rebind ypbind-mt-1.20.4/src/local.h
+--- ypbind-mt-1.20.4/src/local.h.rebind	2015-02-19 16:19:26.298050605 +0100
++++ ypbind-mt-1.20.4/src/local.h	2015-02-19 16:20:08.133041934 +0100
+@@ -9,6 +9,7 @@ extern int ping_interval;
+ extern int use_broadcast;
+ extern int localhost_used;
+ extern char *domain;
++extern int rebind_interval;
+ 
+ extern void find_domain (const char *domain, ypbind_resp *result);
+ extern void clear_server (void);
+diff -up ypbind-mt-1.20.4/src/serv_list.c.rebind ypbind-mt-1.20.4/src/serv_list.c
+--- ypbind-mt-1.20.4/src/serv_list.c.rebind	2015-02-19 16:19:26.293050606 +0100
++++ ypbind-mt-1.20.4/src/serv_list.c	2015-02-19 16:19:26.298050605 +0100
+@@ -1126,7 +1126,7 @@ test_bindings (void *param __attribute__
+ 	pthread_exit (&success);
+ 
+       lastcheck += ping_interval;
+-      if (lastcheck >= 900) /* 900 = 15min. */
++      if (lastcheck >= rebind_interval) /* default 900 = 15min. */
+ 	lastcheck = 0;
+ 
+ #if USE_DBUS_NM
+diff -up ypbind-mt-1.20.4/src/ypbind-mt.c.rebind ypbind-mt-1.20.4/src/ypbind-mt.c
+--- ypbind-mt-1.20.4/src/ypbind-mt.c.rebind	2015-02-19 16:19:26.296050606 +0100
++++ ypbind-mt-1.20.4/src/ypbind-mt.c	2015-02-19 16:21:07.837029560 +0100
+@@ -75,6 +75,7 @@ int ping_interval = 20;
+ int local_only = 0;
+ int localhost_used = 1;
+ int port = -1;
++int rebind_interval = 900; /* 900 = 15min. */
+ static int lock_fd;
+ static int pid_is_written = 0;
+ static pthread_mutex_t mutex_pid = PTHREAD_MUTEX_INITIALIZER;
+@@ -500,7 +501,7 @@ usage (int ret)
+     output = stdout;
+ 
+   fputs (_("Usage:\n"), output);
+-  fputs (_("\typbind [-broadcast | -ypset | -ypsetme] [-p port] [-f configfile]\n\t  [-no-ping] [-broken-server] [-local-only] [-i ping-interval] [-debug] [-verbose]\n"), output);
++  fputs (_("\typbind [-broadcast | -ypset | -ypsetme] [-p port] [-f configfile]\n\t  [-no-ping] [-broken-server] [-local-only] [-i ping-interval] [-r rebind-interval] [-debug] [-verbose]\n"), output);
+ #ifdef USE_DBUS_NM
+   fputs (_("\t  [-no-dbus]\n"), output);
+ #endif
+@@ -721,6 +722,16 @@ main (int argc, char **argv)
+       else if (strcmp ("-no-dbus", argv[i]) == 0)
+ 	disable_dbus = 1;
+ #endif
++      else if (strcmp ("-rebind-interval", argv[i]) == 0 ||
++	       strcmp ("-r", argv[i]) == 0)
++	{
++	  if (i+1 == argc || argv[i+1][0] == '-')
++	    usage (1);
++	  ++i;
++	  rebind_interval = atoi (argv[i]);
++	  if (rebind_interval < 1)
++	    usage (1);
++	}
+       else if (strcmp ("--help", argv[i]) == 0)
+         usage (0);
+       else
+@@ -812,6 +823,7 @@ main (int argc, char **argv)
+     {
+       log_msg (LOG_DEBUG, "[Welcome to ypbind-mt, version %s]\n", VERSION);
+       log_msg (LOG_DEBUG, "ping interval is %d seconds\n", ping_interval);
++      log_msg (LOG_DEBUG, "rebind interval is %d seconds\n", rebind_interval);
+     }
+   else
+     {

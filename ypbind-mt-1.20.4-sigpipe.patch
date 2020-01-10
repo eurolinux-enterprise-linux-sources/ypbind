@@ -1,0 +1,11 @@
+diff -up ypbind-mt-1.20.4/src/ypbind-mt.c.sigpipe ypbind-mt-1.20.4/src/ypbind-mt.c
+--- ypbind-mt-1.20.4/src/ypbind-mt.c.sigpipe	2012-07-23 10:02:03.259863172 +0200
++++ ypbind-mt-1.20.4/src/ypbind-mt.c	2012-07-23 10:02:49.398464135 +0200
+@@ -425,6 +425,7 @@ sig_handler (void *v_param  __attribute_
+   sigaddset (&sigs_to_catch, SIGQUIT);
+   sigaddset (&sigs_to_catch, SIGSEGV);
+   sigaddset (&sigs_to_catch, SIGHUP);
++  sigaddset (&sigs_to_catch, SIGPIPE);
+ 
+   while (1)
+     {

@@ -78,6 +78,14 @@ start() {
 	    fi
 	fi
     fi
+
+    #/etc/rpc check
+    grep ypbind /etc/rpc > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+	action $"Error: Missing ypbind entry in /etc/rpc." false
+	exit 1
+    fi
+
     echo -n $"Starting NIS service: "
     selinux_on
     daemon $exec $OTHER_YPBIND_OPTS
@@ -88,21 +96,17 @@ start() {
 	logger -t ypbind "failed to start!"
 	return $retval
     fi
+    retval=-1
     echo -n $"Binding NIS service: "
     # the following fixes problems with the init scripts continuing
     # even when we are really not bound yet to a server, and then things
     # that need NIS fail.
-    timeout=10
     firsttime=1
     SECONDS=0
-    while [ $SECONDS -lt $timeout ]; do
+    while [ $SECONDS -lt $NISTIMEOUT ] || [ $firsttime -eq 1 ] ; do
+	firsttime=0
 	if /usr/sbin/rpcinfo -p | LC_ALL=C fgrep -q ypbind
 	then
-	    if [ $firsttime -eq 1 ]; then
-		# reset timeout
-		timeout=$NISTIMEOUT
-		firsttime=0
-	    fi
 	    /usr/bin/ypwhich > /dev/null 2>&1
 	    retval=$?
 	    if [ $retval -eq 0 ]; then
@@ -117,6 +121,12 @@ start() {
 	    "NIS domain: `domainname`, NIS server: `ypwhich 2> /dev/null`"
 	touch $lockfile
 	success
+    elif [ $retval -eq -1 ]; then
+	logger -t ypbind \
+            "NIS service failed to register to rpcbind."
+        failure
+        #selinux_off
+        retval=90
     else
 	logger -t ypbind \
 	    "NIS server for domain `domainname` is not responding."

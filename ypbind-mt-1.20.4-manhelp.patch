@@ -1,0 +1,61 @@
+diff -up ypbind-mt-1.20.4/man/ypbind.8.manhelp ypbind-mt-1.20.4/man/ypbind.8
+--- ypbind-mt-1.20.4/man/ypbind.8.manhelp	2015-02-19 16:01:02.414256218 +0100
++++ ypbind-mt-1.20.4/man/ypbind.8	2015-02-19 16:06:07.163199384 +0100
+@@ -41,7 +41,7 @@ to use network broadcasts to find a new
+ will send a ping to all servers and binds to first one which answers.
+ .PP
+ Unless the option
+-\fB\-debug\fR
++\fB\-d, \-debug\fR
+ is used, ypbind detaches itself from the controlling terminal and puts itself into background.
+ \fBypbind\fR
+ uses
+@@ -122,19 +122,19 @@ in debug mode.
+ \fBypbind\fR
+ will not put itself into background, and error messages and debug output are written to standard error.
+ .TP 3n
+-\fB\-verbose\fR
++\fB\-v, \-verbose\fR
+ Causes
+ \fBypbind\fR
+ to syslog(2) any and all changes in the server its bound to.
+ .TP 3n
+-\fB\-broken\-server\fR
++\fB\-broken\-server, \-broken_server\fR
+ lets
+ \fBypbind\fR
+ accept answers from servers running on an illegal port number. This should usually be avoided, but is required by some
+ \fBypserv\fR(8)
+ versions.
+ .TP 3n
+-\fB\-no\-ping\fR
++\fB\-no\-ping, \-no_ping\fR
+ \fBypbind\fR
+ will not check if the binding is alive. This option is for use with dialup connections to prevent
+ \fBypbind\fR
+@@ -154,11 +154,11 @@ will use
+ and not
+ \fI/etc/yp.conf\fR
+ .TP 3n
+-\fB\-local\-only\fR
++\fB\-local\-only, \-local_only\fR
+ \fBypbind\fR
+ will only bind to the loopback device and is not reacheable from a remote network.
+ .TP 3n
+-\fB\-ping\-interval\fR ping\-interval
++\fB\-ping\-interval, \-ping_interval\fR ping\-interval
+ The default value for
+ \fBypbind\fR
+ to check, if a NIS server is still reacheable, is 20 seconds. With this options another frequency in seconds can be specified.
+diff -up ypbind-mt-1.20.4/src/ypbind-mt.c.manhelp ypbind-mt-1.20.4/src/ypbind-mt.c
+--- ypbind-mt-1.20.4/src/ypbind-mt.c.manhelp	2015-02-19 16:01:02.412256218 +0100
++++ ypbind-mt-1.20.4/src/ypbind-mt.c	2015-02-19 16:01:02.414256218 +0100
+@@ -707,7 +707,7 @@ main (int argc, char **argv)
+ 	  port = atoi (argv[i]);
+ 	}
+       else if (strcmp ("-ping-interval", argv[i]) == 0 ||
+-	       strcmp ("-ping-interval", argv[i]) == 0 ||
++	       strcmp ("-ping_interval", argv[i]) == 0 ||
+ 	       strcmp ("-i", argv[i]) == 0)
+ 	{
+ 	  if (i+1 == argc || argv[i+1][0] == '-')
