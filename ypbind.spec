@@ -1,7 +1,7 @@
 Summary: The NIS daemon which binds NIS clients to an NIS domain
 Name: ypbind
 Version: 1.20.4
-Release: 31%{?dist}
+Release: 33%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 Source0: ftp://ftp.us.kernel.org/pub/linux/utils/net/NIS/ypbind-mt-%{version}.tar.bz2
@@ -122,6 +122,16 @@ fi
 %doc README NEWS COPYING
 
 %changelog
+* Wed Mar 02 2016 Matej Muzila <mmuzila@redhat.com> - 3:1.20.4-33
+- Fixed typo in comment in nis.sh
+- Fixed indentation in nis.sh
+- Resolves: #1238771
+
+* Mon Nov 16 2015 Matej Muzila <mmuzila@redhat.com> - 3:1.20.4-32
+- Do not resstart ypbind on dhcp renew if nis domain or nis servers
+  haven't changed
+  Resolves: #1238771
+
 * Thu Feb 19 2015 Honza Horak <hhorak@redhat.com> - 3:1.20.4-31
 - ypbind init script should check for ypbind in /etc/rpc
   Resolves: #888778
