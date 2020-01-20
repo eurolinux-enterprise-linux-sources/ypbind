@@ -2,7 +2,7 @@ Summary: The NIS daemon which binds NIS clients to an NIS domain
 Name: ypbind
 Epoch: 3
 Version: 1.37.1
-Release: 5%{?dist}
+Release: 7%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 Source0: http://www.linux-nis.org/download/ypbind-mt/ypbind-mt-%{version}.tar.bz2
@@ -98,6 +98,12 @@ install -m 755 %{SOURCE5} $RPM_BUILD_ROOT%{_libexecdir}/ypbind-post-waitbind
 %doc README NEWS COPYING
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 3:1.37.1-7
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 3:1.37.1-6
+- Mass rebuild 2013-12-27
+
 * Mon Jul 29 2013 Honza Horak <hhorak@redhat.com> - 3:1.37.1-5
 - Remove SysV init conversion and systemd macros compatible code
 - Require systemd instead systemd-units
