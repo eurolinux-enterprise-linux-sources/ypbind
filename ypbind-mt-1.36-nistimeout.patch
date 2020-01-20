@@ -1,0 +1,35 @@
+diff -up ./man/ypbind.8.nistimeout ./man/ypbind.8
+--- ./man/ypbind.8.nistimeout	2013-04-09 14:31:04.000000000 +0200
++++ ./man/ypbind.8	2013-05-06 19:11:20.509665809 +0200
+@@ -104,6 +104,31 @@ will behave as usual and assumes there i
+ will reread all configuration files, registers at the local portmapper and try to search NIS servers\&. If NetworkManager drops a connection,
+ \fBypbind\fR
+ will unregister from portmapper\&.
++.PP
++In Fedora we use
++\fBsystemd\fR
++for starting services. We need to finish starting process of
++\fBypbind\fR
++service not before service is fully started, which means
++\fBypbind\fR
++daemon is prepared to answer. There is a test script /usr/libexec/ypbind-post-waitbind used in
++\fBypbind.service\fR,
++that waits for
++\fBypbind\fR
++daemon to be fully connected to NIS server and waits by default up to 45s. Sometimes this is not enough, because network set up can take longer than 45s during boot, so starting
++\fBypbind.service\fR
++fails. User can increase the
++\fBtimeout\fR
++by setting an environment variable
++\fBNISTIMEOUT\fR
++in /etc/sysconfig/ypbind. For example NISTIMEOUT=180 means ypbind will wait up to 180 seconds for binding to a NIS server.
++Another option is to enable NetworkManager-wait-online.service and add an ordering rule into
++\fBypbind.service\fR,
++ideally by creating /etc/systemd/system/ypbind.service with the following content:
++
++        .include /lib/systemd/system/ypbind.service  
++        [Service]
++        After=NetworkManager-wait-online.service
+ .SH "OPTIONS"
+ .PP
+ \fB\-broadcast\fR

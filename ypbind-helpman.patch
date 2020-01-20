@@ -1,0 +1,114 @@
+diff -up ./man/ypbind.8.helpman ./man/ypbind.8
+--- ./man/ypbind.8.helpman	2013-05-07 11:22:51.178888612 +0200
++++ ./man/ypbind.8	2013-05-07 11:23:20.497891948 +0200
+@@ -31,9 +31,11 @@
+ ypbind \- NIS binding process
+ .SH "SYNOPSIS"
+ .HP \w'\fBypbind\fR\ 'u
+-\fBypbind\fR [\-c] [\-d | \-debug] [\-verbose] [\-n | \-forground] [\-broadcast] [\-broken\-server] [\-ypset] [\-ypsetme] [\-no\-ping] [\-f\ \fIconfigfile\fR] [\-local\-only] [\-ping\-interval\ \fIping\-interval\fR] [\-rebind\-interval] [\-no\-dbus]
++\fBypbind\fR [\-broadcast\ |\ \-ypset\ |\ \-ypsetme] [\-c] [\-f\ \fIconfigfile\fR] [\-no\-ping] [\-broken\-server] [\-local\-only] [\-i\ |\ \-ping\-interval\ \fIping\-interval\fR] [\-r\ |\ \-rebind\-interval\ \fIrebind\-interval\fR] [\-d\ |\ \-debug] [\-v\ |\ \-verbose] [\-n\ |\ \-foreground] [\-p\ \fIport\fR] [\-log\ \fIlog\-options\fR] [\-no\-dbus]
+ .HP \w'\fBypbind\fR\ 'u
+ \fBypbind\fR \-\-version
++.HP \w'\fBypbind\fR\ 'u
++\fBypbind\fR \-\-help
+ .SH "DESCRIPTION"
+ .PP
+ \fBypbind\fR
+@@ -164,7 +166,7 @@ on the local machine is allowed to chang
+ only checks if the config file has syntax errors and exits\&.
+ .RE
+ .PP
+-\fB\-debug\fR
++\fB\-d, \-debug\fR
+ .RS 4
+ starts
+ \fBypbind\fR
+@@ -173,13 +175,13 @@ in debug mode\&.
+ will not put itself into background, and error messages and debug output are written to standard error\&.
+ .RE
+ .PP
+-\fB\-foreground\fR
++\fB\-n, \-foreground\fR
+ .RS 4
+ \fBypbind\fR
+ will not put itself into backgroun\&.
+ .RE
+ .PP
+-\fB\-verbose\fR
++\fB\-v, \-verbose\fR
+ .RS 4
+ Causes
+ \fBypbind\fR
+@@ -188,7 +190,7 @@ to syslog(2) any and all changes in the
+ .PP
+ \fB\-broken\-server\fR
+ .RS 4
+-lets
++Lets
+ \fBypbind\fR
+ accept answers from servers running on an illegal port number\&. This should usually be avoided, but is required by some
+ \fBypserv\fR(8)
+@@ -218,20 +220,36 @@ and not
+ will only bind to the loopback device and is not reachable from a remote network\&.
+ .RE
+ .PP
+-\fB\-ping\-interval\fR ping\-interval
++\fB\-p port\fR
++.RS 4
++Lets
++\fBypbind\fR
++listen on a specified
++\fBport\fR
++number, rather than asking portmapper to assing a port for it\&.
++.RE
++.PP
++\fB\-i, \-ping\-interval\fR ping\-interval
+ .RS 4
+ The default value for
+ \fBypbind\fR
+ to check, if a NIS server is still reachable, is 20 seconds\&. With this options another frequency in seconds can be specified\&.
+ .RE
+ .PP
+-\fB\-rebind\-interval\fR
++\fB\-r, \-rebind\-interval\fR rebind\-interval
+ .RS 4
+ The default value for
+ \fBypbind\fR
+ to search for the fastest NIS server is 900 seconds (15 minutes)\&. With this options another frequency in seconds can be specified\&.
+ .RE
+ .PP
++\fB\-log\fR log\-options
++.RS 4
++Allows to log special events\&.
++\fBlog\-options\fR
++is a logical sum of values for particular events \- 1 for logging rpc calls, 2 for logging broken server calls, 4 for logging server changes\&.
++.RE
++.PP
+ \fB\-no\-dbus\fR
+ .RS 4
+ Disables DBUS support if compiled in\&.
+diff -up ./src/ypbind-mt.c.helpman ./src/ypbind-mt.c
+--- ./src/ypbind-mt.c.helpman	2013-04-09 16:03:47.000000000 +0200
++++ ./src/ypbind-mt.c	2013-05-07 11:22:51.180888612 +0200
+@@ -513,12 +513,17 @@ usage (int ret)
+     output = stdout;
+ 
+   fputs (_("Usage:\n"), output);
+-  fputs (_("\typbind [-broadcast | -ypset | -ypsetme] [-f configfile]\n\t  [-no-ping] [-broken-server] [-local-only] [-i ping-interval]\n\t  [-r rebind-interval] [-debug] [-verbose] [-n | -foreground]\n"), output);
++  fputs ("\typbind [-broadcast | -ypset | -ypsetme] [-f configfile] [-no-ping]\n"
++           "\t  [-broken-server] [-local-only] [-i | -ping-interval ping-interval]\n"
++           "\t  [-r | -rebind-interval rebind-interval] [-d | -debug] [-v | -verbose]\n"
++           "\t  [-n | -foreground] [-p port] [-log log-options]", output);
+ #ifdef USE_DBUS_NM
+-  fputs (_("\t  [-no-dbus]\n"), output);
++  fputs (" [-no-dbus]", output);
+ #endif
+-  fputs (_("\typbind -c [-f configfile]\n"), output);
+-  fputs (_("\typbind --version\n"), output);
++  fputs ("\n", output);
++  fputs ("\typbind -c [-f configfile]\n", output);
++  fputs ("\typbind --version\n", output);
++  fputs ("\typbind --help\n", output);
+   exit (ret);
+ }
+ 
