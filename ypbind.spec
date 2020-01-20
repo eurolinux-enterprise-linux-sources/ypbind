@@ -2,7 +2,7 @@ Summary: The NIS daemon which binds NIS clients to an NIS domain
 Name: ypbind
 Epoch: 3
 Version: 1.37.1
-Release: 7%{?dist}
+Release: 9%{?dist}
 License: GPLv2
 Group: System Environment/Daemons
 Source0: http://www.linux-nis.org/download/ypbind-mt/ypbind-mt-%{version}.tar.bz2
@@ -98,6 +98,16 @@ install -m 755 %{SOURCE5} $RPM_BUILD_ROOT%{_libexecdir}/ypbind-post-waitbind
 %doc README NEWS COPYING
 
 %changelog
+* Wed Mar 29 2017 Petr Kubat <pkubat@redhat.com> - 3:1.37.1-9
+- Wait a while for dhcp to set up the domain (#1170400)
+
+* Tue Mar 21 2017 Petr Kubat <pkubat@redhat.com> - 3:1.37.1-8
+- Load ypbind.service after network-online.target (#1382804)
+
+* Thu Dec 15 2016 Petr Kubat <pkubat@redhat.com> - 3:1.37.1-8
+- Do not restart ypbind when domain is unchanged (#1301708)
+- Load ypbind.service before nss-user-lookup.target (#1217435)
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 3:1.37.1-7
 - Mass rebuild 2014-01-24
 

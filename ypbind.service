@@ -1,8 +1,10 @@
 [Unit]
 Description=NIS/YP (Network Information Service) Clients to NIS Domain Binder
 Requires=rpcbind.service
-After=syslog.target network.target rpcbind.service ypserv.service NetworkManager-wait-online.service
+Wants=nss-user-lookup.target
+After=syslog.target network-online.target rpcbind.service ypserv.service NetworkManager-wait-online.service
 Before=systemd-user-sessions.service
+Before=nss-user-lookup.target
 
 [Service]
 Type=notify
